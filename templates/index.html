@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police Complaint Registration - Robbery & Theft Report System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a69bd 0%, #3c6382 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2ecc71;
+        }
+
+        .progress-indicator {
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 18px 22px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 70%;
+            line-height: 1.5;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .input-container {
+            background: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            padding: 15px 20px;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #c00;
+            margin: 20px;
+        }
+
+        .completion-summary {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .completion-summary h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .complaint-id {
+            font-size: 18px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                margin: 0;
+                max-width: none;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .chat-messages {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>🚔 Police Complaint Registration</h1>
+            <p>Robbery & Theft Report System</p>
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span id="connection-status">Connected - <span id="complaint-count">0</span> total complaints</span>
+                </div>
+                <div class="progress-indicator">
+                    <span id="progress-text">Step 1 of 15</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will be dynamically inserted here -->
+        </div>
+
+        <div class="input-container">
+            <textarea 
+                id="message-input" 
+                class="message-input" 
+                placeholder="Type your response here..." 
+                rows="1"
+            ></textarea>
+            <button id="send-button" class="send-button" type="button">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class RobberyComplaintChat {
+            constructor() {
+                this.sessionId = this.generateSessionId();
+                this.apiBaseUrl = window.location.origin;
+                this.messagesContainer = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.connectionStatus = document.getElementById('connection-status');
+                this.progressText = document.getElementById('progress-text');
+                this.complaintCount = document.getElementById('complaint-count');
+                this.isLoading = false;
+                this.isCompleted = false;
+
+                this.initializeEventListeners();
+                this.checkSystemStatus();
+                this.startChat();
+            }
+
+            generateSessionId() {
+                return 'session_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            }
+
+            initializeEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                this.messageInput.addEventListener('input', () => {
+                    this.adjustTextareaHeight();
+                });
+            }
+
+            adjustTextareaHeight() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+            }
+
+            async checkSystemStatus() {
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/api/status`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        this.updateConnectionStatus(true, data.complaint_count);
+                    } else {
+                        this.updateConnectionStatus(false, 0);
+                    }
+                } catch (error) {
+                    console.error('Status check failed:', error);
+                    this.updateConnectionStatus(false, 0);
+                }
+            }
+
+            updateConnectionStatus(connected, complaintCount = 0) {
+                const statusText = connected ? 
+                    `Connected - ${complaintCount} total complaints` : 
+                    'Connection Error';
+                this.connectionStatus.textContent = statusText;
+                this.complaintCount.textContent = complaintCount;
+            }
+
+            async startChat() {
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/api/chat/start`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        this.addMessage('bot', data.message);
+                        this.updateProgress(data.current_step, data.total_steps);
+                    } else {
+                        this.showError('Failed to start chat: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Chat start failed:', error);
+                    this.showError('Failed to connect to the server. Please check your connection.');
+                }
+            }
+
+            async sendMessage() {
+                if (this.isLoading || this.isCompleted) return;
+                
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // Add user message to chat
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                this.adjustTextareaHeight();
+                
+                // Show loading state
+                this.setLoading(true);
+                this.showTypingIndicator();
+
+                try {
+                    const response = await fetch(`${this.apiBaseUrl}/api/chat/message`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            message: message
+                        })
+                    });
+
+                    const data = await response.json();
+                    this.hideTypingIndicator();
+
+                    if (data.status === 'success') {
+                        this.addMessage('bot', data.message);
+                        this.updateProgress(data.current_step, data.total_steps);
+                        
+                        if (data.completed && data.complaint_id) {
+                            this.showCompletionSummary(data.complaint_id);
+                            this.isCompleted = true;
+                            this.messageInput.disabled = true;
+                            this.sendButton.disabled = true;
+                        }
+                    } else {
+                        this.addMessage('bot', 'Sorry, there was an error processing your message: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Send message failed:', error);
+                    this.hideTypingIndicator();
+                    this.addMessage('bot', 'Sorry, I\'m having trouble connecting to the server. Please try again.');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            addMessage(sender, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = `message-avatar ${sender}-avatar`;
+                avatar.textContent = sender === 'bot' ? '🤖' : '👤';
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                messageContent.textContent = content;
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(messageContent);
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message bot';
+                typingDiv.id = 'typing-indicator';
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar bot-avatar';
+                avatar.textContent = '🤖';
+                
+                const content = document.createElement('div');
+                content.className = 'message-content loading';
+                content.innerHTML = `
+                    <span>Assistant is typing</span>
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+                
+                typingDiv.appendChild(avatar);
+                typingDiv.appendChild(content);
+                this.messagesContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+
+            hideTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+
+            updateProgress(currentStep, totalSteps) {
+                this.progressText.textContent = `Step ${currentStep} of ${totalSteps}`;
+            }
+
+            showCompletionSummary(complaintId) {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'completion-summary';
+                summaryDiv.innerHTML = `
+                    <h3>✅ Complaint Submitted Successfully!</h3>
+                    <p>Your robbery complaint has been registered in the system.</p>
+                    <div class="complaint-id">Complaint ID: ${complaintId}</div>
+                    <p>Please save this ID for future reference. You can now contact the relevant police station with this complaint ID.</p>
+                `;
+                
+                this.messagesContainer.appendChild(summaryDiv);
+                this.scrollToBottom();
+            }
+
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                this.messagesContainer.appendChild(errorDiv);
+                this.scrollToBottom();
+            }
+
+            setLoading(loading) {
+                this.isLoading = loading;
+                this.sendButton.disabled = loading;
+                this.messageInput.disabled = loading;
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                }, 100);
+            }
+        }
+
+        // Initialize the chat when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            new RobberyComplaintChat();
+        });
+    </script>
+</body>
+</html>
